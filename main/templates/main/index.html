@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AbobaVPN</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.0/dist/cdn.min.js" defer></script>
+    <script src="{% static 'main/panels-animation.js' %}"></script>
+    <style>
+        .hero-bg {
+            background: linear-gradient(to right, #4a90e2, #9013fe);
+        }
+        .mobile-menu {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 50;
+        }
+            .mobile-menu.open {
+                transform: translateX(0);
+            }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Header -->
+    <header class="bg-white shadow-md relative z-50">  <!-- Добавлено relative и z-50 -->
+        <?php session_start(); ?>
+        <div class="container mx-auto flex justify-between items-center py-4 px-6">
+            <h1> <a href="{% url 'home' %}" class="text-3xl font-extrabold text-blue-600">AbobaVPN</a></h1>
+            <nav class="flex items-center space-x-6">
+                <ul class="flex space-x-6">
+                    <li><a href="#about" class="text-gray-700 hover:text-blue-600">О нас</a></li>
+                    <li><a href="#features" class="text-gray-700 hover:text-blue-600">Особенности</a></li>
+                    <li><a href="#testimonials" class="text-gray-700 hover:text-blue-600">Отзывы</a></li>
+                    <li><a href="#pricing" class="text-gray-700 hover:text-blue-600">Тарифы</a></li>
+                    <li><a href="#contact" class="text-gray-700 hover:text-blue-600">Контакты</a></li>
+                </ul>
+                {% if user.is_authenticated %}
+                <div class="relative">
+                    <button onclick="toggleDropdown()" class="text-gray-700 hover:text-blue-600">{{ user.email }}</button>
+                    <div id="dropdownMenu" class="absolute right-0 mt-2 w-48 bg-white border rounded-lg shadow-lg hidden z-50">
+                        <a href="{% url 'profile' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Профиль</a>
+                        <a href="{% url 'logout' %}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Выйти</a>
+                    </div>
+                </div>
+                {% else %}
+                    <div id="authButtons" class="flex items-center space-x-4">
+                        <a href="{% url 'login' %}" class="text-gray-700 hover:text-blue-600">Вход</a>
+                        <span class="text-gray-700">/</span>
+                        <a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600">Регистрация</a>
+                    </div>
+                {% endif %}
+            </nav>
+        </div>
+    <style>
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.8;
+            transform: scale(0);
+            animation: wave-expand 2s cubic-bezier(0.36, 0.45, 0.63, 0.53) forwards;
+        }
+
+        .wave-1 {
+            left: -50%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            animation-delay: 0.3s;
+        }
+
+        .wave-2 {
+            right: -50%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            animation-delay: 0.6s;
+        }
+
+        @keyframes wave-expand {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+
+        .hero-bg {
+            position: relative;
+            overflow: hidden;
+            background-color: #1e40af; /* Итоговый цвет после смешения */
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            opacity: 0;
+            animation: fade-in 1.5s ease-out 1.2s forwards;
+        }
+
+        @keyframes fade-in {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Анимации панелей из предыдущего примера */
+        .panel-card {
+            transition: all 0.3s ease;
+        }
+
+        .click-effect {
+            pointer-events: none;
+            border-radius: inherit;
+        }
+        /* Добавьте эти стили в существующий style блок */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fade-in 1s ease-out forwards;
+        }
+
+        /* Убедимся, что контент поверх волн */
+        .container.relative.z-10 {
+            z-index: 20;
+        }
+
+        /* Оптимизируем анимацию волн */
+        .wave {
+            z-index: 10;
+        }
+
+        /* Улучшаем видимость панелей */
+        .panel-card {
+            z-index: 30;
+            position: relative;
+        }
+    </style>
+    </header>
+    <section class="hero-bg text-white h-screen flex flex-col justify-center items-center text-center relative z-10">
+<!-- z-10 вместо z-40 или других высоких значений -->
+        <!-- Анимированные волны -->
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+
+        <!-- Основной контент -->
+        <div class="container mx-auto px-4 relative z-10 opacity-0 animate-fade-in" style="animation-delay: 1.5s;">
+            <h2 class="text-5xl font-bold mb-6 leading-tight">Защитите свои данные с AbobaVPN</h2>
+            <p class="text-xl mb-12 max-w-2xl mx-auto">
+                Присоединяйтесь к тысячам пользователей, которые доверяют нашей платформе для безопасного и анонимного доступа в интернет.
+            </p>
+            <a href="#" class="bg-white text-blue-600 py-3 px-8 rounded-full font-semibold hover:bg-gray-100 transition duration-300 inline-block mb-16">
+                Начать использовать
+            </a>
+
+            <!-- Панели с информацией -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                <!-- Панель 1 -->
+                <div class="panel-card bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+                    <div class="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Безопасность</h3>
+                    <p class="text-white/80">Военная шифровка данных и защита от утечек DNS</p>
+                    <div class="click-effect"></div>
+                </div>
+
+                <!-- Панель 2 -->
+                <div class="panel-card bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+                    <div class="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Серверы</h3>
+                    <p class="text-white/80">Более 500 серверов в 42 странах для быстрого доступа</p>
+                    <div class="click-effect"></div>
+                </div>
+
+                <!-- Панель 3 -->
+                <div class="panel-card bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-[1.02] relative overflow-hidden">
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-4 mx-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Анонимность</h3>
+                    <p class="text-white/80">Никаких логов деятельности, полная конфиденциальность</p>
+                    <div class="click-effect"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<style>
+    /* Обновлённые стили для панелей */
+    .panel-card {
+        position: relative;
+        z-index: 20;
+        will-change: transform;
+        cursor: pointer;
+        overflow: hidden;
+        /* Убираем transition из CSS, будем управлять через JS */
+    }
+
+    .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: scale(0);
+        opacity: 1;
+        pointer-events: none;
+        animation: ripple 0.6s linear;
+    }
+
+    @keyframes ripple {
+        to {
+            transform: scale(2.5);
+            opacity: 0;
+        }
+    }
+
+    .panel-card:active {
+        transform: scale(0.95) !important;
+        filter: brightness(0.9);
+        transition: transform 0.1s ease-out !important;
+    }
+</style>
+
+</section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16">
+        <div class="container md:flex block mx-auto px-6">
+            <div class="md:w-1/2 pr-4">
+                <h2 class="text-4xl font-bold mb-8 text-gray-900">Почему выбирают наш VPN?</h2>
+                <p class="text-lg mb-6 text-gray-700">
+                    Наш VPN помогает пользователям из России и стран СНГ сохранять свободу и анонимность в интернете. В условиях растущей интернет-цензуры и контроля, VPN становится важным инструментом для доступа к информации без ограничений. Наша платформа предлагает надёжную защиту от блокировок, позволяет анонимно просматривать веб-сайты и использовать интернет без страха быть отслеженным. Выбирая наш VPN, вы получаете быстрый, безопасный и стабильный доступ к любым ресурсам, где бы вы ни находились.
+                </p>
+            </div>
+            <div class="md:w-1/2">
+                <img src="https://via.placeholder.com/800x500" alt="About Us" class="mx-auto rounded-lg shadow-lg" />
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="bg-gray-100 py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-12 text-gray-900">Особенности нашего VPN</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-2xl transition duration-300">
+                    <img src="{% static '/anonymous.svg' %}" alt="Анонимность" class="mx-auto rounded-lg shadow-lg my-16" width="100" height="100" />
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">Анонимность</h3>
+                    <p class="text-gray-600">
+                        Ваш IP-адрес остаётся скрытым, что гарантирует полную приватность при работе в интернете.
+                    </p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-2xl transition duration-300">
+                    <img src="{% static '/speedometer.svg' %}" alt="Высокая скорость" class="mx-auto rounded-lg shadow-lg my-16" width="100" height="100" />
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">Высокая скорость</h3>
+                    <p class="text-gray-600">
+                        Наш VPN-сервис оптимизирован для максимальной скорости, чтобы вы могли стримить видео, загружать файлы и пользоваться интернетом без замедлений.
+                    </p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-lg hover:shadow-2xl transition duration-300">
+                    <img src="{% static '/gateway-vpn.svg' %}" alt="Доступ к заблокированным ресурсам" class="mx-auto rounded-lg shadow-lg my-16" width="100" height="100" />
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">Доступ к заблокированным ресурсам</h3>
+                    <p class="text-gray-600">
+                        Наш сервис обеспечивает доступ к сайтам и сервисам, которые могут быть заблокированы в вашей стране.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Информационное окно -->
+    <div id="infoModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+            <h2 id="infoModalTitle" class="text-2xl font-bold mb-4 text-center"></h2>
+            <p id="infoModalMessage" class="text-gray-700 text-center mb-6"></p>
+            <button onclick="closeModal('infoModal')" class="bg-blue-600 text-white py-2 px-4 rounded-lg w-full hover:bg-blue-700">
+                ОК
+            </button>
+        </div>
+    </div>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-12 text-gray-900">Тарифные планы VPN</h2>
+            <div class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 flex flex-col justify-between h-full border border-gray-200">
+                    <div class="text-center">
+                        <img src="https://via.placeholder.com/130" alt="Базовый план" class="w-16 h-16 mx-auto mb-4 rounded-full" />
+                        <h3 class="text-2xl font-bold mb-4 text-blue-700">
+
+                            <h3 class="text-2xl font-bold mb-4 text-blue-700">Базовый план</h3>
+                            <p class="text-gray-800 text-lg mb-4">299 ₽/месяц</p>
+                            <p class="text-gray-600 mb-6">
+                                Идеально подходит для простого и безопасного серфинга в интернете. Подключение до 5 устройств, 10 серверов в 5 странах.
+                            </p>
+                    </div>
+                    <ul class="text-left text-gray-600 mb-6 space-y-2">
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Подключение 5 устройств
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            10 серверов в 5 странах
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Безлимитный трафик
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0);" onclick="selectPlan(1)" class="bg-blue-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-blue-700">Выбрать план</a>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 flex flex-col justify-between h-full border border-gray-200">
+                    <div class="text-center">
+                        <img src="https://via.placeholder.com/130" alt="Продвинутый план" class="w-16 h-16 mx-auto mb-4 rounded-full" />
+                        <h3 class="text-2xl font-bold mb-4 text-blue-700">Продвинутый план</h3>
+                        <p class="text-gray-800 text-lg mb-4">599 ₽/месяц</p>
+                        <p class="text-gray-600 mb-6">
+                            Для пользователей, которые хотят больше. Подключение до 10 устройств, 50 серверов в 20 странах, приоритетная поддержка.
+                        </p>
+                    </div>
+                    <ul class="text-left text-gray-600 mb-6 space-y-2">
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Подключение 10 устройств
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            50 серверов в 20 странах
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Приоритетная поддержка
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0);" onclick="selectPlan(2)" class="bg-blue-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-blue-700">Выбрать план</a>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-2xl transition duration-300 flex flex-col justify-between h-full border border-gray-200">
+                    <div class="text-center">
+                        <img src="https://via.placeholder.com/130" alt="Корпоративный план" class="w-16 h-16 mx-auto mb-4 rounded-full" />
+                        <h3 class="text-2xl font-bold mb-4 text-blue-700">Корпоративный план</h3>
+                        <p class="text-gray-800 text-lg mb-4">1499 ₽/месяц</p>
+                        <p class="text-gray-600 mb-6">
+                            Максимальная защита и безлимитные возможности. Неограниченное количество устройств, доступ к 100 серверам, выделенный IP.
+                        </p>
+                    </div>
+                    <ul class="text-left text-gray-600 mb-6 space-y-2">
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Неограниченное количество устройств
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Доступ к 100 серверам по всему миру
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-4 h-4 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Выделенный IP-адрес
+                        </li>
+                    </ul>
+                    <a href="javascript:void(0);" onclick="selectPlan(3)" class="bg-blue-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-blue-700">Выбрать план</a>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="bg-gray-50 py-16">
+        <div class="container mx-auto px-6 flex justify-center">
+            <div class="flex w-full max-w-4xl shadow-lg rounded-lg overflow-hidden">
+                <form action="#" method="POST" class="bg-white p-8 w-full lg:w-1/3">
+                    <h2 class="text-4xl font-bold mb-8 text-gray-900">Возникли проблемы? Свяжись с нами</h2>
+                    <div class="mb-6">
+                        <label for="name" class="block text-gray-700 mb-2">Имя</label>
+                        <input type="text" id="name" name="name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" required />
+                    </div>
+                    <div class="mb-6">
+                        <label for="email" class="block text-gray-700 mb-2">Email</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" required />
+                    </div>
+                    <div class="mb-6">
+                        <label for="message" class="block text-gray-700 mb-2">Сообщение</label>
+                        <textarea id="message" name="message" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" required></textarea>
+                    </div>
+                    <button type="submit" class="bg-blue-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-blue-700 transition duration-300 w-full">Отправить</button>
+                </form>
+
+                <div class="hidden lg:block w-2/3">
+                    <img src="https://via.placeholder.com/400" alt="Связаться с нами" class="w-full h-full object-cover rounded-r-lg" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-blue-600 text-white py-6">
+        <div class="container mx-auto text-center">
+            <p>&copy; 2024 AbobaVPN. Все права защищены.</p>
+        </div>
+    </footer>
+<!-- Модальное окно для пополнения баланса -->
+<div id="balanceModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden" onclick="closeOnClickOutside(event, 'balanceModalContent')">
+    <div id="balanceModalContent" class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
+        <h2 class="text-2xl font-bold mb-4">Пополнение баланса</h2>
+        <form id="balanceForm">
+            <label for="balanceAmount" class="block text-gray-700">Сумма</label>
+            <input type="number" id="balanceAmount" name="amount" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-lg w-full mt-4 hover:bg-blue-700">Пополнить</button>
+        </form>
+    </div>
+</div>
+<script>
+    function toggleDropdown() {
+        const menu = document.getElementById('dropdownMenu');
+        menu.classList.toggle('hidden');
+    }
+
+</script>
+</body>
+</html>

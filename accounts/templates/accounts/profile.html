@@ -1,0 +1,432 @@
+{% extends "accounts/base.html" %}
+
+{% block content %}
+<style>
+         /* Основные стили для панели */
+    .profile-container {
+        position: relative;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        background: white;
+        overflow: hidden;
+    }
+
+    /* Яркий градиентный фон */
+    .wave-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        background: linear-gradient(135deg, #2563eb, #7c3aed, #10b981);
+    }
+
+    /* Яркие цветные волны */
+    .wave {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(70px);
+        opacity: 0.9;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+    }
+
+    /* Ярко-синяя волна */
+    .wave-1 {
+        width: 350px;
+        height: 350px;
+        background: rgba(37, 99, 235, 0.8); /* Более насыщенный синий */
+        top: -50px;
+        left: -50px;
+        animation: wave-1-move 15s linear infinite;
+    }
+
+    /* Ярко-фиолетовая волна */
+    .wave-2 {
+        width: 450px;
+        height: 450px;
+        background: rgba(124, 58, 237, 0.7); /* Более насыщенный фиолетовый */
+        bottom: -100px;
+        right: -100px;
+        animation: wave-2-move 20s linear infinite;
+    }
+
+    /* Ярко-зелёная волна */
+    .wave-3 {
+        width: 400px;
+        height: 400px;
+        background: rgba(16, 185, 129, 0.7); /* Более насыщенный зелёный */
+        top: 50%;
+        left: 30%;
+        animation: wave-3-move 25s linear infinite;
+    }
+
+    /* Анимации */
+    @keyframes wave-1-move {
+        0% { transform: translate(0, 0); }
+        50% { transform: translate(150px, 100px); }
+        100% { transform: translate(0, 0); }
+    }
+
+    @keyframes wave-2-move {
+        0% { transform: translate(0, 0); }
+        50% { transform: translate(-120px, -80px); }
+        100% { transform: translate(0, 0); }
+    }
+
+    @keyframes wave-3-move {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(80px, -80px) scale(1.3); }
+        100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* Контент с лёгкой прозрачностью */
+    .profile-content {
+        position: relative;
+        z-index: 2;
+        padding: 2rem;
+        background: rgba(255, 255, 255, 0.88);
+        backdrop-filter: blur(8px);
+        min-height: 100%;
+    }
+
+    .subscription-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(4px);
+    }
+</style>
+
+<div class="container mx-auto my-10 p-5">
+    <div class="profile-container">
+        <!-- Фон с анимацией волн -->
+        <div class="wave-bg">
+            <div class="wave wave-1"></div>
+            <div class="wave wave-2"></div>
+            <div class="wave wave-3"></div>
+        </div>
+
+        <!-- Контент панели -->
+        <div class="profile-content">
+            <h1 class="text-3xl font-bold text-blue-600 mb-6">Личный кабинет</h1>
+
+            <div class="mb-4">
+                <h2 class="text-xl font-semibold">Информация о пользователе</h2>
+                <p><strong>Логин:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Баланс:</strong> {{ profile.balance|floatformat:2 }} ₽</p>
+                <a href="{% url 'change_password' %}" class="text-blue-600 hover:underline">Сменить пароль</a>
+            </div>
+
+            <div class="mb-6">
+                <h2 class="text-xl font-semibold">Ваши подписки</h2>
+                {% if subscriptions %}
+                    <ul class="space-y-4">
+                        {% for subscription in subscriptions %}
+                            <li class="p-4 border border-gray-200 rounded-lg subscription-card">
+                                <h3 class="text-lg font-semibold">{{ subscription.plan.name }}</h3>
+                                <p>Дата окончания: {{ subscription.end_date|date:"d.m.Y" }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-gray-600">Нет активных подписок.</p>
+                {% endif %}
+            </div>
+
+            <div class="flex justify-end mb-8">
+                <button onclick="openModal('balanceModal')"
+                        class="bg-blue-600 text-white py-2 px-4 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg">
+                    Пополнить баланс
+                </button>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Доступные подписки</h2>
+                <ul class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for plan in plans %}
+                        <li class="p-4 border border-gray-200 rounded-lg subscription-card hover:bg-opacity-90 transition duration-300">
+                            <h3 class="text-lg font-semibold">{{ plan.name }}</h3>
+                            <p class="text-gray-600">Цена: {{ plan.price|floatformat:2 }} ₽</p>
+                            <p class="text-gray-600">Срок действия: {{ plan.duration_months }} месяцев</p>
+                            <button onclick="showPurchaseModal(
+                                {{ plan.plan_id }},
+                                '{{ plan.name }}',
+                                '{{ plan.description|escapejs }}',
+                                {{ plan.price }},
+                                {{ profile.balance }}
+                            )" class="bg-blue-600 text-white py-2 px-4 rounded-lg mt-4 hover:bg-blue-700 transition duration-300">
+                                Купить
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для покупки плана -->
+<div id="purchaseModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full relative">
+        <button onclick="closeModal('purchaseModal')"
+                class="absolute top-2 right-2 text-gray-500 hover:text-gray-800">
+            &times;
+        </button>
+        <h2 id="purchasePlanName" class="text-2xl font-bold mb-4"></h2>
+        <p id="purchasePlanDescription" class="text-gray-700 mb-4"></p>
+        <p><strong>Ваш баланс:</strong> <span id="userBalance"></span> ₽</p>
+        <p><strong>Стоимость плана:</strong> <span id="purchasePlanPrice"></span> ₽</p>
+        <button onclick="confirmPurchase()"
+                class="bg-blue-600 text-white py-2 px-4 rounded-lg mt-4 w-full hover:bg-blue-700">
+            Подтвердить покупку
+        </button>
+        <p id="purchaseError" class="text-red-500 mt-4 hidden"></p>
+    </div>
+</div>
+
+<!-- Модальное окно для пополнения баланса -->
+<div id="balanceModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full relative overflow-hidden">
+        <!-- Стилизованная банковская карта -->
+        <div class="relative h-48 bg-gradient-to-r from-blue-500 to-purple-600 p-6 text-white">
+            <div class="absolute top-0 left-0 w-full h-full overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-40 h-40 bg-white rounded-full opacity-10"></div>
+                <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-white rounded-full opacity-10"></div>
+            </div>
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-8">
+                    <div>
+                        <p class="text-sm opacity-80">Номер карты</p>
+                        <p class="text-xl tracking-widest">•••• •••• •••• ••••</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm opacity-80">Срок действия</p>
+                        <p class="text-xl">••/••</p>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <p class="text-xl">{{ user.get_full_name|default:"ИМЯ ВЛАДЕЛЬЦА" }}</p>
+                    <div class="flex space-x-2">
+                        <div class="w-10 h-6 bg-yellow-400 rounded"></div>
+                        <div class="w-10 h-6 bg-red-400 rounded"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6">
+            <button onclick="closeModal('balanceModal')"
+                    class="absolute top-4 right-4 text-gray-500 hover:text-gray-800">
+                &times;
+            </button>
+
+            <h2 class="text-2xl font-bold mb-6">Пополнение баланса</h2>
+
+            <form id="balanceForm" method="POST" action="{% url 'add_balance' %}">
+                {% csrf_token %}
+
+                <div class="space-y-4">
+                    <div>
+                        <label for="cardNumber" class="block text-gray-700 mb-1">Номер карты</label>
+                        <input type="text" id="cardNumber" name="card_number"
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                               placeholder="1234 5678 9012 3456" required>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="expiryDate" class="block text-gray-700 mb-1">Срок действия</label>
+                            <input type="text" id="expiryDate" name="expiry_date"
+                                   class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                   placeholder="MM/YY" required>
+                        </div>
+                        <div>
+                            <label for="cvv" class="block text-gray-700 mb-1">CVV</label>
+                            <input type="text" id="cvv" name="cvv"
+                                   class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                                   placeholder="123" required>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="balanceAmount" class="block text-gray-700 mb-1">Сумма пополнения (₽)</label>
+                        <input type="number" id="balanceAmount" name="amount" min="100" step="100"
+                               class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                               required>
+                    </div>
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg mt-6 hover:bg-blue-700 transition duration-300">
+                    Пополнить баланс
+                </button>
+            </form>
+
+            <p id="balanceError" class="text-red-500 mt-4 hidden"></p>
+
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p>Все операции защищены SSL-шифрованием</p>
+                <div class="flex justify-center space-x-4 mt-2">
+                    <img src="https://via.placeholder.com/40" alt="Visa" class="h-8">
+                    <img src="https://via.placeholder.com/40" alt="Mastercard" class="h-8">
+                    <img src="https://via.placeholder.com/40" alt="Мир" class="h-8">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Функция открытия модального окна
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.remove('hidden');
+    }
+
+    let selectedPlanId = null;
+
+    // Открыть модальное окно для покупки
+    function showPurchaseModal(planId, planName, planDescription, planPrice, userBalance) {
+        selectedPlanId = planId;
+        document.getElementById('purchasePlanName').textContent = planName;
+        document.getElementById('purchasePlanDescription').textContent = planDescription;
+        document.getElementById('purchasePlanPrice').textContent = planPrice.toFixed(2);
+        document.getElementById('userBalance').textContent = userBalance.toFixed(2);
+        document.getElementById('purchaseModal').classList.remove('hidden');
+    }
+
+    // Закрыть модальное окно
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.add('hidden');
+    }
+
+    // Подтвердить покупку
+    function confirmPurchase() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch("{% url 'buy_plan' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({ plan_id: selectedPlanId })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                document.getElementById('purchaseError').textContent = data.message;
+                document.getElementById('purchaseError').classList.remove('hidden');
+            }
+        })
+        .catch(error => console.error("Ошибка:", error));
+    }
+
+    // Обновленный обработчик формы пополнения баланса
+    document.getElementById('balanceForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const errorElement = document.getElementById('balanceError');
+        errorElement.classList.add('hidden');
+
+        // Валидация данных карты
+        const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+        if (!/^\d{16}$/.test(cardNumber)) {
+            errorElement.textContent = 'Введите корректный номер карты (16 цифр)';
+            errorElement.classList.remove('hidden');
+            return;
+        }
+
+        // Валидация срока действия
+        const expiryDate = document.getElementById('expiryDate').value;
+        if (!/^\d{2}\/\d{2}$/.test(expiryDate)) {
+            errorElement.textContent = 'Введите срок действия в формате MM/YY';
+            errorElement.classList.remove('hidden');
+            return;
+        }
+
+        // Валидация CVV
+        const cvv = document.getElementById('cvv').value;
+        if (!/^\d{3}$/.test(cvv)) {
+            errorElement.textContent = 'Введите корректный CVV (3 цифры)';
+            errorElement.classList.remove('hidden');
+            return;
+        }
+
+        // Валидация суммы
+        const amount = parseFloat(document.getElementById('balanceAmount').value);
+        if (amount < 100) {
+            errorElement.textContent = 'Минимальная сумма пополнения - 100 ₽';
+            errorElement.classList.remove('hidden');
+            return;
+        }
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`Баланс успешно пополнен на ${data.amount} ₽`);
+                closeModal('balanceModal');
+                // Обновляем баланс на странице
+                const balanceElements = document.querySelectorAll('p strong');
+                balanceElements.forEach(el => {
+                    if (el.textContent.includes('Баланс:')) {
+                        el.nextSibling.textContent = ` ${data.new_balance} ₽`;
+                    }
+                });
+            } else {
+                errorElement.textContent = data.message || 'Ошибка при пополнении баланса';
+                errorElement.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            errorElement.textContent = 'Произошла ошибка. Попробуйте позже.';
+            errorElement.classList.remove('hidden');
+        });
+    });
+
+    // Добавляем маску для номера карты
+    document.getElementById('cardNumber').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+        let formatted = '';
+        for (let i = 0; i < value.length && i < 16; i++) {
+            if (i > 0 && i % 4 === 0) formatted += ' ';
+            formatted += value[i];
+        }
+        e.target.value = formatted;
+    });
+
+    // Добавляем маску для срока действия
+    document.getElementById('expiryDate').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2, 4);
+        }
+        e.target.value = value;
+    });
+
+    // Ограничиваем CVV 3 символами
+    document.getElementById('cvv').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '').substring(0, 3);
+    });
+
+    // Закрыть модальное окно при клике вне его области
+    window.addEventListener('click', function(event) {
+        const purchaseModal = document.getElementById('purchaseModal');
+        if (event.target === purchaseModal) {
+            closeModal('purchaseModal');
+        }
+        const balanceModal = document.getElementById('balanceModal');
+        if (event.target === balanceModal) {
+            closeModal('balanceModal');
+        }
+    });
+</script>
+{% endblock %}
