@@ -77,7 +77,14 @@ WSGI_APPLICATION = 'abobavpn.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'vpn_website',  # Имя вашей базы данных
+        'USER': 'postgres',     # Пользователь базы данных
+        'PASSWORD': 'lplp',     # Пароль пользователя
+        'HOST': 'localhost',    # Хост базы данных (или IP-адрес сервера)
+        'PORT': '5432',         # Порт базы данных
+    }
 }
 
 
