@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-fhfl$r9v-u%sux)+2x_kjkp-1f^avhplnoe)3b0pb+lz2@(tmc
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['abobavpn.onrender.com', 'www.abobavpn.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
