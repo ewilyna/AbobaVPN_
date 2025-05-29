@@ -84,6 +84,9 @@ DATABASES = {
         'PASSWORD': 'Starlife123',     # Пароль пользователя
         'HOST': 'toniha6t.beget.tech',    # Хост базы данных (или IP-адрес сервера)
         'PORT': '3306',         # Порт базы данных
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        }
     }
 }
 
