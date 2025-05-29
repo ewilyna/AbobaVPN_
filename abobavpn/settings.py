@@ -78,12 +78,12 @@ WSGI_APPLICATION = 'abobavpn.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'vpn_website',  # Имя вашей базы данных
-        'USER': 'postgres',     # Пользователь базы данных
-        'PASSWORD': 'lplp',     # Пароль пользователя
-        'HOST': 'localhost',    # Хост базы данных (или IP-адрес сервера)
-        'PORT': '5432',         # Порт базы данных
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'toniha6t_databas',  # Имя вашей базы данных
+        'USER': 'toniha6t_databas',     # Пользователь базы данных
+        'PASSWORD': 'Starlife123',     # Пароль пользователя
+        'HOST': 'toniha6t.beget.tech',    # Хост базы данных (или IP-адрес сервера)
+        'PORT': '3306',         # Порт базы данных
     }
 }
 
